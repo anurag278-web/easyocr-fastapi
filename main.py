@@ -97,7 +97,8 @@ async def ocr_endpoint(file: UploadFile = File(...), languages: Optional[str] = 
         requested_langs = [l.strip() for l in languages.split(",") if l.strip()]
 
     # Build EasyOCR reader (gpu=False -> CPU)
-    reader, used_langs = build_reader(requested_langs=requested_langs, gpu=False)
+    reader, used_langs = build_reader(requested_langs=requested_langs or ["en"], gpu=False)
+
 
     # Convert PIL image to numpy array expected by EasyOCR
     import numpy as np
@@ -140,13 +141,3 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
 
-@app.on_event("startup")
-def preload_models():
-    import easyocr
-    import logging
-    try:
-        logging.info("🔄 Preloading OCR models...")
-        easyocr.Reader(["en", "hi", "ta", "te", "bn"], gpu=False)
-        logging.info("✅ OCR models preloaded successfully!")
-    except Exception as e:
-        logging.warning(f"⚠️ Failed to preload OCR models: {e}")
