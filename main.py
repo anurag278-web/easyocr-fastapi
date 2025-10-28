@@ -139,3 +139,14 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+@app.on_event("startup")
+def preload_models():
+    import easyocr
+    import logging
+    try:
+        logging.info("🔄 Preloading OCR models...")
+        easyocr.Reader(["en", "hi", "ta", "te", "bn"], gpu=False)
+        logging.info("✅ OCR models preloaded successfully!")
+    except Exception as e:
+        logging.warning(f"⚠️ Failed to preload OCR models: {e}")
